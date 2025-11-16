@@ -19,11 +19,23 @@ export const followResolvers = {
       args: FollowUserArgs,
       context: GqlContextWithFollow,
     ): Promise<boolean> => {
-      // TODO: Implement this
-      // 1. Check if context.currentUser exists (must be logged in)
-      // 2. Call context.followService.followUser(args.userId, context.currentUser)
-      // 3. Return true
-      throw new Error('Method not implemented.');
+      // --- THIS IS THE IMPLEMENTATION ---
+
+      // 1. Check if user is logged in
+      if (!context.currentUser) {
+        throw new GraphQLError('You must be logged in to follow users', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
+      }
+
+      // 2. Call the (already tested) service
+      await context.followService.followUser(
+        args.userId,
+        context.currentUser,
+      );
+
+      // 3. Return true on success
+      return true;
     },
   },
 };
