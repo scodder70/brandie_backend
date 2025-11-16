@@ -1,0 +1,9 @@
+# We're extending the root Mutation type
+type Mutation {
+  """
+  Allows the currently authenticated user to follow another user.
+  Takes the ID of the user to follow as input.
+  Returns 'true' if the follow was successful.
+  """
+  followUser(userId: ID!): Boolean!
+}
