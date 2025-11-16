@@ -4,9 +4,13 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
 
-  // --- THIS IS THE FIX ---
   // Tells Jest to load the .env file before running tests
   setupFiles: ['dotenv/config'],
+
+  // --- THIS IS THE FIX ---
+  // Forces Jest to run one test file at a time (serially).
+  // This prevents integration tests from interfering with each other.
+  maxWorkers: 1,
   // -----------------------
 
   // It ONLY looks for files in src/modules ending in .spec.ts

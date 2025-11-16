@@ -16,11 +16,11 @@ describe('User Resolvers (Unit)', () => {
 
   // 2. Create a mock context object
   const mockContext = {
-    // --- THIS IS THE FIX ---
     prisma: {} as any, // We're not using prisma in this unit test
-    // -----------------------
-    // We cast the mock service to 'any' to satisfy TypeScript
     usersService: mockUsersService as any,
+    // --- THIS IS THE FIX ---
+    currentUser: null, // Add the missing property
+    // -----------------------
   };
 
   // Clear the mock's call history before each test

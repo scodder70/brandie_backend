@@ -33,7 +33,6 @@ describe('UsersService (Integration)', () => {
     await prisma.$disconnect();
   });
 
-  // ... [omitted "createUser" and "duplicate" tests for brevity] ...
   it('should create a new user with a hashed password', async () => {
     // 1. ARRANGE
     const userData: CreateUserInput = {
@@ -61,6 +60,7 @@ describe('UsersService (Integration)', () => {
     expect(dbUser?.password).not.toBe(userData.password);
   });
 
+  // --- THIS TEST IS REFACTORED ---
   it('should throw an error if the email is already taken', async () => {
     // 1. ARRANGE
     // First, create a user
@@ -79,19 +79,15 @@ describe('UsersService (Integration)', () => {
     };
 
     // 2. ACT & 3. ASSERT
-    // We expect this to fail
-    // We use expect.assertions() to ensure the async error is caught
-    expect.assertions(2);
-    try {
-      await usersService.createUser(userData2);
-    } catch (error) {
-      expect(error).toBeInstanceOf(GraphQLError);
-      expect((error as GraphQLError).message).toBe(
-        'User with this email or username already exists',
-      );
-    }
+    // This is the new, more reliable way to test for async errors
+    await expect(
+      usersService.createUser(userData2),
+    ).rejects.toThrow(
+      new GraphQLError('User with this email or username already exists'),
+    );
   });
 
+  // --- THIS TEST IS REFACTORED ---
   it('should throw an error if the username is already taken', async () => {
     // 1. ARRANGE
     // First, create a user
@@ -110,18 +106,13 @@ describe('UsersService (Integration)', () => {
     };
 
     // 2. ACT & 3. ASSERT
-    expect.assertions(2);
-    try {
-      await usersService.createUser(userData2);
-    } catch (error) {
-      expect(error).toBeInstanceOf(GraphQLError);
-      expect((error as GraphQLError).message).toBe(
-        'User with this email or username already exists',
-      );
-    }
+    await expect(
+      usersService.createUser(userData2),
+    ).rejects.toThrow(
+      new GraphQLError('User with this email or username already exists'),
+    );
   });
 
-  // --- Our "happy path" login test ---
   it('should log in a user with valid credentials and return a JWT', async () => {
     // 1. ARRANGE
     // First, create a user so we have someone to log in
@@ -134,7 +125,6 @@ describe('UsersService (Integration)', () => {
     const user = await usersService.createUser(userData);
 
     // 2. ACT
-    // This is the line that will fail, because login is not implemented
     const { token } = await usersService.login({
       email: userData.email,
       password: password,
@@ -148,27 +138,19 @@ describe('UsersService (Integration)', () => {
     const decodedToken = jwt.decode(token) as { sub: string; email: string };
     expect(decodedToken.sub).toBe(user.id);
     expect(decodedToken.email).toBe(user.email);
-  });
+  }); // <-- THIS IS THE MISSING '});'
 
-  // --- ADD THESE 2 NEW "RED" TESTS ---
-
+  // --- THESE TESTS ARE REFACTORED ---
   it('should throw an "Invalid email or password" error for a non-existent email', async () => {
-    // 1. ARRANGE
-    // (No user is created, so no email will match)
+    // 1. ARRANGE (No user created)
 
     // 2. ACT & 3. ASSERT
-    expect.assertions(2); // Expect 2 assertions to be checked
-    try {
-      await usersService.login({
+    await expect(
+      usersService.login({
         email: 'wrong@example.com',
         password: 'password123',
-      });
-    } catch (error) {
-      expect(error).toBeInstanceOf(GraphQLError);
-      expect((error as GraphQLError).message).toBe(
-        'Invalid email or password',
-      );
-    }
+      }),
+    ).rejects.toThrow(new GraphQLError('Invalid email or password'));
   });
 
   it('should throw an "Invalid email or password" error for an incorrect password', async () => {
@@ -183,17 +165,11 @@ describe('UsersService (Integration)', () => {
     await usersService.createUser(userData);
 
     // 2. ACT & 3. ASSERT
-    expect.assertions(2); // Expect 2 assertions to be checked
-    try {
-      await usersService.login({
+    await expect(
+      usersService.login({
         email: userData.email,
         password: 'THIS IS THE WRONG PASSWORD',
-      });
-    } catch (error) {
-      expect(error).toBeInstanceOf(GraphQLError);
-      expect((error as GraphQLError).message).toBe(
-        'Invalid email or password',
-      );
-    }
+      }),
+    ).rejects.toThrow(new GraphQLError('Invalid email or password'));
   });
 });

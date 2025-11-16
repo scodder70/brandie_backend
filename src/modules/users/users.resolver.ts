@@ -1,12 +1,10 @@
 import { GraphQLError } from 'graphql';
-// --- UPDATE IMPORTS ---
 import {
   CreateUserInput,
   PublicUser,
   LoginInput,
   LoginResponse,
 } from './users.types';
-// --------------------
 import { UsersService } from './users.service';
 import { PrismaService } from '@/shared/db/prisma.service';
 
@@ -15,7 +13,6 @@ type CreateUserArgs = {
   input: CreateUserInput;
 };
 
-// --- ADD NEW ARGS TYPE ---
 type LoginArgs = {
   input: LoginInput;
 };
@@ -26,6 +23,10 @@ type LoginArgs = {
 export type GqlContext = {
   prisma: PrismaService;
   usersService: UsersService;
+  // --- ADD THIS LINE ---
+  // This will hold the user data if they are authenticated
+  currentUser: PublicUser | null;
+  // ---------------------
 };
 
 export const userResolvers = {
