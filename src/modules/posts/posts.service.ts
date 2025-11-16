@@ -10,10 +10,31 @@ export class PostsService {
     input: CreatePostInput,
     currentUser: PublicUser,
   ): Promise<Post> {
-    // TODO: Implement this
     // 1. Check that 'text' or 'mediaUrl' is provided
+    if (!input.text && !input.mediaUrl) {
+      throw new GraphQLError('A post must have either text or a media URL.', {
+        extensions: { code: 'BAD_REQUEST' },
+      });
+    }
+
     // 2. Create the 'Post' in the database, linking it to the 'authorId'
-    // 3. Return the new post
-    throw new Error('Method not implemented.');
+    try {
+      const newPost = await this.prisma.post.create({
+        data: {
+          text: input.text,
+          mediaUrl: input.mediaUrl,
+          authorId: currentUser.id, // Link to the user who is logged in
+        },
+      });
+
+      // 3. Return the new post
+      return newPost;
+    } catch (error: any) {
+      // Handle any unexpected database errors
+      console.error(error);
+      throw new GraphQLError('An error occurred while creating the post.', {
+        extensions: { code: 'INTERNAL_SERVER_ERROR' },
+      });
+    }
   }
 }
