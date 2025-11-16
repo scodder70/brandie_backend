@@ -24,16 +24,15 @@ export const followResolvers = {
       return context.followService.getFollowing(args.userId);
     },
 
-    // --- ADD THIS SKELETON ---
+    // --- IMPLEMENT THIS RESOLVER ---
     followers: async (
       _parent: any,
       args: FollowUserArgs, // Re-uses the same args type
       context: GqlContextWithFollow,
     ) => {
-      // TODO: Implement this
-      // 1. Call context.followService.getFollowers(args.userId)
-      // 2. Return the list of users
-      throw new Error('Method not implemented.');
+      // 1. Call the (already tested) service
+      // This query is also public
+      return context.followService.getFollowers(args.userId);
     },
     // -------------------------
   },
