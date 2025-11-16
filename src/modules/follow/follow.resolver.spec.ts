@@ -44,7 +44,7 @@ describe('Follow Resolvers (Unit)', () => {
     mockFollowService.unfollowUser.mockClear();
   });
 
-  // --- Our "Happy Path" Test ---
+  // --- "followUser" tests ---
   it('should call followService.followUser with correct args', async () => {
     // 1. ARRANGE
     const mockArgs = { userId: 'user-to-follow-id' };
@@ -84,7 +84,7 @@ describe('Follow Resolvers (Unit)', () => {
     );
   });
 
-  // --- ADD THIS NEW "RED" TEST ---
+  // --- "unfollowUser" tests ---
   it('should call followService.unfollowUser with correct args', async () => {
     // 1. ARRANGE
     const mockArgs = { userId: 'user-to-unfollow-id' };
@@ -92,7 +92,6 @@ describe('Follow Resolvers (Unit)', () => {
     mockFollowService.unfollowUser.mockResolvedValue(undefined);
 
     // 2. ACT
-    // This will fail with "Method not implemented"
     const result = await followResolvers.Mutation.unfollowUser(
       null, // _parent
       mockArgs, // args
@@ -108,5 +107,21 @@ describe('Follow Resolvers (Unit)', () => {
     expect(result).toBe(true);
   });
 
-  // it.todo('should throw an auth error if no user is in context for unfollowUser');
+  // --- ADD THIS NEW "RED" TEST ---
+  it('should throw an auth error if no user is in context for unfollowUser', async () => {
+    // 1. ARRANGE
+    const mockArgs = { userId: 'user-to-unfollow-id' };
+
+    // 2. ACT & 3. ASSERT
+    // We expect this to fail with the specific error
+    await expect(
+      followResolvers.Mutation.unfollowUser(
+        null, // _parent
+        mockArgs, // args
+        mockContextLoggedOut, // context (user is null)
+      ),
+    ).rejects.toThrow(
+      new GraphQLError('You must be logged in to unfollow users'),
+    );
+  });
 });
