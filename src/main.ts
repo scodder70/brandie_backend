@@ -4,21 +4,19 @@ import { typeDefs } from './schema';
 import { resolvers } from './modules';
 import { PrismaService } from './shared/db/prisma.service';
 import { UsersService } from './modules/users/users.service';
-// --- UPDATE THIS IMPORT ---
-import { GqlContextWithFollow } from './modules/follow/follow.resolver';
+// --- 1. IMPORT THE NEW CENTRAL CONTEXT ---
+import { GqlContext } from './shared/types/gql-context';
 import 'dotenv/config'; // Ensure .env is loaded
 import { getUserFromToken } from './shared/auth/auth.guard';
-// --- IMPORT THE FOLLOW SERVICE ---
 import { FollowService } from './modules/follow/follow.service';
 
 // --- Create instances of our Services ---
 const prisma = new PrismaService();
 const usersService = new UsersService(prisma);
-// --- CREATE THE FOLLOW SERVICE ---
 const followService = new FollowService(prisma);
 
-// --- Define the Server (use the new context type) ---
-const server = new ApolloServer<GqlContextWithFollow>({
+// --- 2. Define the Server (use the new context type) ---
+const server = new ApolloServer<GqlContext>({
   typeDefs,
   resolvers,
 });
@@ -34,7 +32,7 @@ async function startServer() {
       return {
         prisma,
         usersService,
-        followService, // <-- ADD THE SERVICE TO THE CONTEXT
+        followService,
         currentUser,
       };
     },

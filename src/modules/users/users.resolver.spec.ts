@@ -19,8 +19,9 @@ describe('User Resolvers (Unit)', () => {
     prisma: {} as any, // We're not using prisma in this unit test
     usersService: mockUsersService as any,
     // --- THIS IS THE FIX ---
-    currentUser: null, // Add the missing property
+    followService: {} as any, // Add the missing mock service
     // -----------------------
+    currentUser: null, // Add the missing property
   };
 
   // Clear the mock's call history before each test

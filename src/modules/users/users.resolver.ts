@@ -5,8 +5,11 @@ import {
   LoginInput,
   LoginResponse,
 } from './users.types';
-import { UsersService } from './users.service';
-import { PrismaService } from '@/shared/db/prisma.service';
+// --- 1. REMOVE UNUSED IMPORTS ---
+// import { UsersService } from './users.service';
+// import { PrismaService } from '@/shared/db/prisma.service';
+// --- 2. IMPORT THE CENTRAL CONTEXT ---
+import { GqlContext } from '@/shared/types/gql-context';
 
 // This is the shape of the 'args' object our resolver will receive
 type CreateUserArgs = {
@@ -17,17 +20,7 @@ type LoginArgs = {
   input: LoginInput;
 };
 
-// This is the shape of the GraphQL 'context'
-// We will add the prisma instance and services here
-// so our resolvers can access them
-export type GqlContext = {
-  prisma: PrismaService;
-  usersService: UsersService;
-  // --- ADD THIS LINE ---
-  // This will hold the user data if they are authenticated
-  currentUser: PublicUser | null;
-  // ---------------------
-};
+// --- 3. REMOVE THE OLD GqlContext DEFINITION ---
 
 export const userResolvers = {
   Mutation: {
@@ -35,7 +28,7 @@ export const userResolvers = {
     createUser: async (
       _parent: any,
       args: CreateUserArgs,
-      context: GqlContext,
+      context: GqlContext, // Now uses the central context
     ): Promise<PublicUser> => {
       // The resolver's only job is to call the service.
       // We've already tested the service's logic (hashing, duplicates),
@@ -43,15 +36,13 @@ export const userResolvers = {
       return context.usersService.createUser(args.input);
     },
 
-    // --- THIS IS THE FIX ---
     login: async (
       _parent: any,
       args: LoginArgs,
-      context: GqlContext,
+      context: GqlContext, // Now uses the central context
     ): Promise<LoginResponse> => {
       // The resolver's only job is to call the service.
       return context.usersService.login(args.input);
     },
-    // ---------------------------------
   },
 };

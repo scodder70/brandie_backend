@@ -1,47 +1,44 @@
-import { GqlContext } from '@/modules/users/users.resolver';
+// --- 1. IMPORT THE CENTRAL CONTEXT ---
+import { GqlContext } from '@/shared/types/gql-context';
 import { GraphQLError } from 'graphql';
-import { FollowService } from './follow.service';
+// --- 2. REMOVE UNUSED IMPORTS ---
+// import { FollowService } from './follow.service';
 
 // This is the shape of the 'args' object our resolver will receive
 type FollowUserArgs = {
   userId: string;
 };
 
-// We need to extend the GqlContext to include our new FollowService
-export type GqlContextWithFollow = GqlContext & {
-  followService: FollowService;
-};
+// --- 3. REMOVE THE OLD GqlContextWithFollow DEFINITION ---
 
 export const followResolvers = {
   Query: {
     following: async (
       _parent: any,
-      args: FollowUserArgs, // Re-uses the same args type
-      context: GqlContextWithFollow,
+      args: FollowUserArgs,
+      context: GqlContext, // Now uses the central context
     ) => {
       // 1. Call the (already tested) service
       // This query is public, so no auth check is needed
       return context.followService.getFollowing(args.userId);
     },
 
-    // --- IMPLEMENT THIS RESOLVER ---
     followers: async (
       _parent: any,
-      args: FollowUserArgs, // Re-uses the same args type
-      context: GqlContextWithFollow,
+      args: FollowUserArgs,
+      context: GqlContext, // Now uses the central context
     ) => {
       // 1. Call the (already tested) service
       // This query is also public
       return context.followService.getFollowers(args.userId);
     },
-    // -------------------------
   },
 
   Mutation: {
     followUser: async (
       _parent: any,
       args: FollowUserArgs,
-      context: GqlContextWithFollow,
+      context: GqlContext, // Now uses the central context
     ): Promise<boolean> => {
       // 1. Check if user is logged in
       if (!context.currentUser) {
@@ -62,8 +59,8 @@ export const followResolvers = {
 
     unfollowUser: async (
       _parent: any,
-      args: FollowUserArgs, // Re-uses the same args type
-      context: GqlContextWithFollow,
+      args: FollowUserArgs,
+      context: GqlContext, // Now uses the central context
     ): Promise<boolean> => {
       // 1. Check if user is logged in
       if (!context.currentUser) {
