@@ -1,4 +1,6 @@
 import { followResolvers } from './follow.resolver';
+// --- IMPORT GraphQLError ---
+import { GraphQLError } from 'graphql';
 
 // This is a UNIT TEST. We are mocking the service and context.
 
@@ -38,7 +40,7 @@ describe('Follow Resolvers (Unit)', () => {
     mockFollowService.followUser.mockClear();
   });
 
-  // --- Our New "RED" Test ---
+  // --- Our "Happy Path" Test ---
   it('should call followService.followUser with correct args', async () => {
     // 1. ARRANGE
     const mockArgs = { userId: 'user-to-follow-id' };
@@ -46,7 +48,6 @@ describe('Follow Resolvers (Unit)', () => {
     mockFollowService.followUser.mockResolvedValue(undefined);
 
     // 2. ACT
-    // This will fail with "Method not implemented"
     const result = await followResolvers.Mutation.followUser(
       null, // _parent
       mockArgs, // args
@@ -62,5 +63,21 @@ describe('Follow Resolvers (Unit)', () => {
     expect(result).toBe(true);
   });
 
-  // it.todo('should throw an auth error if no user is in context');
+  // --- ADD THIS NEW "RED" TEST ---
+  it('should throw an auth error if no user is in context', async () => {
+    // 1. ARRANGE
+    const mockArgs = { userId: 'user-to-follow-id' };
+
+    // 2. ACT & 3. ASSERT
+    // We expect this to fail with the specific error
+    await expect(
+      followResolvers.Mutation.followUser(
+        null, // _parent
+        mockArgs, // args
+        mockContextLoggedOut, // context (user is null)
+      ),
+    ).rejects.toThrow(
+      new GraphQLError('You must be logged in to follow users'),
+    );
+  });
 });
