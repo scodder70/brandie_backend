@@ -1,3 +1,13 @@
+# --- ADD THIS NEW TYPE ---
+# We must extend the root Query type
+type Query {
+  """
+  Gets a list of users that a specific user is following.
+  Takes the ID of the user to check.
+  """
+  following(userId: ID!): [User!]!
+}
+
 # We're extending the root Mutation type
 type Mutation {
   """

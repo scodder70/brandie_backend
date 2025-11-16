@@ -13,6 +13,21 @@ export type GqlContextWithFollow = GqlContext & {
 };
 
 export const followResolvers = {
+  // --- ADD THIS NEW QUERY SKELETON ---
+  Query: {
+    following: async (
+      _parent: any,
+      args: FollowUserArgs, // Re-uses the same args type
+      context: GqlContextWithFollow,
+    ) => {
+      // TODO: Implement this
+      // 1. Call context.followService.getFollowing(args.userId)
+      // 2. Return the list of users
+      throw new Error('Method not implemented.');
+    },
+  },
+  // ---------------------------------
+
   Mutation: {
     followUser: async (
       _parent: any,
@@ -36,7 +51,6 @@ export const followResolvers = {
       return true;
     },
 
-    // --- IMPLEMENT THIS RESOLVER ---
     unfollowUser: async (
       _parent: any,
       args: FollowUserArgs, // Re-uses the same args type

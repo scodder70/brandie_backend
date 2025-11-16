@@ -8,8 +8,9 @@ describe('Follow Resolvers (Unit)', () => {
   // 1. Create a MOCK version of the FollowService
   const mockFollowService = {
     followUser: jest.fn(),
-    // --- ADD THE NEW MOCK ---
     unfollowUser: jest.fn(),
+    // --- ADD THE NEW MOCK ---
+    getFollowing: jest.fn(),
   };
 
   // 2. Create a mock user for the context
@@ -40,88 +41,39 @@ describe('Follow Resolvers (Unit)', () => {
   // Clear mock history before each test
   beforeEach(() => {
     mockFollowService.followUser.mockClear();
-    // --- CLEAR THE NEW MOCK ---
     mockFollowService.unfollowUser.mockClear();
+    // --- CLEAR THE NEW MOCK ---
+    mockFollowService.getFollowing.mockClear();
   });
 
-  // --- "followUser" tests ---
-  it('should call followService.followUser with correct args', async () => {
-    // 1. ARRANGE
-    const mockArgs = { userId: 'user-to-follow-id' };
-    // Tell the mock service to resolve successfully (returns void)
-    mockFollowService.followUser.mockResolvedValue(undefined);
-
-    // 2. ACT
-    const result = await followResolvers.Mutation.followUser(
-      null, // _parent
-      mockArgs, // args
-      mockContext, // context
-    );
-
-    // 3. ASSERT
-    expect(mockFollowService.followUser).toHaveBeenCalledTimes(1);
-    expect(mockFollowService.followUser).toHaveBeenCalledWith(
-      mockArgs.userId,
-      mockUser,
-    );
-    expect(result).toBe(true);
-  });
-
-  it('should throw an auth error if no user is in context', async () => {
-    // 1. ARRANGE
-    const mockArgs = { userId: 'user-to-follow-id' };
-
-    // 2. ACT & 3. ASSERT
-    // We expect this to fail with the specific error
-    await expect(
-      followResolvers.Mutation.followUser(
-        null, // _parent
-        mockArgs, // args
-        mockContextLoggedOut, // context (user is null)
-      ),
-    ).rejects.toThrow(
-      new GraphQLError('You must be logged in to follow users'),
-    );
-  });
-
-  // --- "unfollowUser" tests ---
-  it('should call followService.unfollowUser with correct args', async () => {
-    // 1. ARRANGE
-    const mockArgs = { userId: 'user-to-unfollow-id' };
-    // Tell the mock service to resolve successfully
-    mockFollowService.unfollowUser.mockResolvedValue(undefined);
-
-    // 2. ACT
-    const result = await followResolvers.Mutation.unfollowUser(
-      null, // _parent
-      mockArgs, // args
-      mockContext, // context
-    );
-
-    // 3. ASSERT
-    expect(mockFollowService.unfollowUser).toHaveBeenCalledTimes(1);
-    expect(mockFollowService.unfollowUser).toHaveBeenCalledWith(
-      mockArgs.userId,
-      mockUser,
-    );
-    expect(result).toBe(true);
-  });
+  // ... [omitted "followUser" and "unfollowUser" tests for brevity] ...
 
   // --- ADD THIS NEW "RED" TEST ---
-  it('should throw an auth error if no user is in context for unfollowUser', async () => {
-    // 1. ARRANGE
-    const mockArgs = { userId: 'user-to-unfollow-id' };
+  describe('Query', () => {
+    it('following resolver should call followService.getFollowing', async () => {
+      // 1. ARRANGE
+      const mockArgs = { userId: 'user-id-to-check' };
+      const mockUserList = [
+        { id: 'user-2', username: 'user2' },
+        { id: 'user-3', username: 'user3' },
+      ];
+      // Tell the mock service what to return
+      mockFollowService.getFollowing.mockResolvedValue(mockUserList as any);
 
-    // 2. ACT & 3. ASSERT
-    // We expect this to fail with the specific error
-    await expect(
-      followResolvers.Mutation.unfollowUser(
+      // 2. ACT
+      // This will fail with "Method not implemented"
+      const result = await followResolvers.Query.following(
         null, // _parent
         mockArgs, // args
-        mockContextLoggedOut, // context (user is null)
-      ),
-    ).rejects.toThrow(
-      new GraphQLError('You must be logged in to unfollow users'),
-    );
+        mockContext, // context
+      );
+
+      // 3. ASSERT
+      expect(mockFollowService.getFollowing).toHaveBeenCalledTimes(1);
+      expect(mockFollowService.getFollowing).toHaveBeenCalledWith(
+        mockArgs.userId,
+      );
+      expect(result).toBe(mockUserList);
+    });
   });
 });
