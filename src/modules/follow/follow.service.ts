@@ -81,12 +81,21 @@ export class FollowService {
     return relations.map((relation) => relation.following);
   }
 
-  // --- ADD THIS SKELETON METHOD ---
+  // --- IMPLEMENT THIS METHOD ---
   async getFollowers(userId: string): Promise<User[]> {
-    // TODO: Implement this
     // 1. Find all 'Relations' where 'followingId' is 'userId'
-    // 2. Include the 'follower' user data for each relation
+    const relations = await this.prisma.relation.findMany({
+      where: {
+        followingId: userId,
+      },
+      // 2. Include the 'follower' user data for each relation
+      include: {
+        follower: true, // This "includes" the User object
+      },
+    });
+
     // 3. Return the list of users
-    throw new Error('Method not implemented.');
+    // We map over the relations and return just the 'follower' user object
+    return relations.map((relation) => relation.follower);
   }
 }
