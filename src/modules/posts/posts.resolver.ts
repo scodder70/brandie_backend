@@ -14,21 +14,11 @@ export const postsResolvers = {
       args: CreatePostArgs,
       context: GqlContext,
     ) => {
-      // 1. Check if user is logged in
-      if (!context.currentUser) {
-        throw new GraphQLError('You must be logged in to create a post', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
-
-      // 2. Call the (already tested) service
-      const newPost = await context.postsService.createPost(
-        args.input,
-        context.currentUser,
-      );
-
+      // TODO: Implement this
+      // 1. Check if user is logged in (context.currentUser)
+      // 2. Call context.postsService.createPost(args.input, context.currentUser)
       // 3. Return the new post
-      return newPost;
+      throw new Error('Method not implemented.');
     },
   },
 };

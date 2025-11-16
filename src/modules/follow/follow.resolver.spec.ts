@@ -10,7 +10,6 @@ describe('Follow Resolvers (Unit)', () => {
     followUser: jest.fn(),
     unfollowUser: jest.fn(),
     getFollowing: jest.fn(),
-    // --- ADD THE NEW MOCK ---
     getFollowers: jest.fn(),
   };
 

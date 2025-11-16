@@ -37,7 +37,7 @@ describe('Posts Resolvers (Unit)', () => {
     mockPostsService.createPost.mockClear();
   });
 
-  // --- Our "Happy Path" Test ---
+  // --- Our "Happy Path" "RED" Test ---
   it('should call postsService.createPost with correct args', async () => {
     // 1. ARRANGE
     const mockArgs = {
@@ -72,28 +72,5 @@ describe('Posts Resolvers (Unit)', () => {
       mockUser,
     );
     expect(result).toBe(mockPost);
-  });
-
-  // --- ADD THIS NEW "RED" TEST ---
-  it('should throw an auth error if no user is in context', async () => {
-    // 1. ARRANGE
-    const mockArgs = {
-      input: {
-        text: 'This is a test post',
-        mediaUrl: null,
-      },
-    };
-
-    // 2. ACT & 3. ASSERT
-    // We expect this to fail with the specific error
-    await expect(
-      postsResolvers.Mutation.createPost(
-        null, // _parent
-        mockArgs, // args
-        mockContextLoggedOut, // context (user is null)
-      ),
-    ).rejects.toThrow(
-      new GraphQLError('You must be logged in to create a post'),
-    );
   });
 });
