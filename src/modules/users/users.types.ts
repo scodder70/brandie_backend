@@ -6,3 +6,13 @@ export type CreateUserInput = Pick<User, 'username' | 'email' | 'password'>;
 
 // This will be our new return type, excluding the password
 export type PublicUser = Omit<User, 'password'>;
+
+// --- ADD THESE NEW TYPES ---
+
+// Input for the login mutation
+export type LoginInput = Pick<User, 'email' | 'password'>;
+
+// Response from the login mutation
+export type LoginResponse = {
+  token: string;
+};

@@ -1,9 +1,16 @@
 import { PrismaClient } from '@prisma/client';
-// Import our new PublicUser type
-import { CreateUserInput, PublicUser } from './users.types';
+// Import our new types
+import {
+  CreateUserInput,
+  PublicUser,
+  LoginInput,
+  LoginResponse,
+} from './users.types';
 import * as bcrypt from 'bcrypt';
-// We'll use this for error handling
 import { GraphQLError } from 'graphql';
+// --- IMPORT THE TYPES WE NEED ---
+import * as jwt from 'jsonwebtoken';
+import { Secret, SignOptions } from 'jsonwebtoken';
 
 export class UsersService {
   // We use dependency injection to pass in the prisma client
@@ -45,5 +52,51 @@ export class UsersService {
         extensions: { code: 'INTERNAL_SERVER_ERROR' },
       });
     }
+  }
+
+  // --- IMPLEMENT THE LOGIN METHOD ---
+  async login(input: LoginInput): Promise<LoginResponse> {
+    // 1. Find user by email
+    const user = await this.prisma.user.findUnique({
+      where: { email: input.email },
+    });
+
+    // 2. If no user, throw "Invalid credentials"
+    if (!user) {
+      throw new GraphQLError('Invalid email or password', {
+        extensions: { code: 'UNAUTHENTICATED' },
+      });
+    }
+
+    // 3. Compare passwords
+    const isPasswordValid = await bcrypt.compare(input.password, user.password);
+
+    // 4. If no match, throw "Invalid credentials"
+    if (!isPasswordValid) {
+      throw new GraphQLError('Invalid email or password', {
+        extensions: { code: 'UNAUTHENTICATED' },
+      });
+    }
+
+    // 5. Sign JWT
+    // Make sure JWT_SECRET is set in your .env file
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new Error('JWT_SECRET is not defined in .env');
+    }
+
+    // --- THIS IS THE FIX ---
+    // Read the expiration as a string, then parse it to a number.
+    const expiresInString = process.env.JWT_EXPIRES_IN_SECONDS || '86400';
+    const expiresIn = parseInt(expiresInString, 10);
+
+    const token = jwt.sign(
+      { sub: user.id, email: user.email }, // This is the payload
+      secret as Secret, // Cast the secret
+      { expiresIn: expiresIn } // Pass the expiration as a number
+    );
+
+    // 6. Return { token: '...' }
+    return { token };
   }
 }

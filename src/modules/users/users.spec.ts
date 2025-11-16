@@ -4,6 +4,8 @@ import { UsersService } from './users.service';
 import { CreateUserInput } from './users.types';
 // Import the error we expect
 import { GraphQLError } from 'graphql';
+// --- ADD THIS IMPORT ---
+import * as jwt from 'jsonwebtoken';
 
 describe('UsersService (Integration)', () => {
   let usersService: UsersService;
@@ -120,5 +122,34 @@ describe('UsersService (Integration)', () => {
         'User with this email or username already exists',
       );
     }
+  });
+
+  // --- AND ADD THIS NEW "RED" TEST FOR LOGIN ---
+  it('should log in a user with valid credentials and return a JWT', async () => {
+    // 1. ARRANGE
+    // First, create a user so we have someone to log in
+    const password = 'strongpassword123';
+    const userData: CreateUserInput = {
+      username: 'loginuser',
+      email: 'login@example.com',
+      password: password,
+    };
+    const user = await usersService.createUser(userData);
+
+    // 2. ACT
+    // This is the line that will fail, because login is not implemented
+    const { token } = await usersService.login({
+      email: userData.email,
+      password: password,
+    });
+
+    // 3. ASSERT
+    expect(token).toBeDefined();
+    expect(token.split('.').length).toBe(3); // JWTs have 3 parts
+
+    // 4. VERIFY (Decode the token and check its payload)
+    const decodedToken = jwt.decode(token) as { sub: string; email: string };
+    expect(decodedToken.sub).toBe(user.id);
+    expect(decodedToken.email).toBe(user.email);
   });
 });
