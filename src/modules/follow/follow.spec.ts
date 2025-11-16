@@ -124,4 +124,27 @@ describe('FollowService (Integration)', () => {
     const deletedRelation = await prisma.relation.findFirst();
     expect(deletedRelation).toBeNull();
   });
+
+  // --- THIS IS THE TEST FROM THE LAST STEP ---
+  it('should throw an error if a user tries to unfollow someone they do not follow', async () => {
+    // 1. ARRANGE
+    // Create user1 and user2
+    const user1 = await usersService.createUser({
+      username: 'user1',
+      email: 'user1@example.com',
+      password: 'password',
+    });
+    const user2 = await usersService.createUser({
+      username: 'user2',
+      email: 'user2@example.com',
+      password: 'password',
+    });
+    // NOTE: We do *not* create a follow relationship
+
+    // 2. ACT & 3. ASSERT
+    // We expect this to fail with the specific error
+    await expect(
+      followService.unfollowUser(user2.id, user1),
+    ).rejects.toThrow(new GraphQLError('You are not following this user'));
+  });
 });
