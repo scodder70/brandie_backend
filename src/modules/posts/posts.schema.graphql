@@ -1,0 +1,24 @@
+# Define the Post type for our API
+# We can include the author User object
+type Post {
+  id: ID!
+  createdAt: String!
+  updatedAt: String!
+  text: String
+  mediaUrl: String
+  author: User! # We can fetch the author for each post
+}
+
+# Define the input for creating a post
+input CreatePostInput {
+  text: String
+  mediaUrl: String
+}
+
+# Extend the root Mutation type
+type Mutation {
+  """
+  Allows the currently authenticated user to create a new post.
+  """
+  createPost(input: CreatePostInput!): Post!
+}

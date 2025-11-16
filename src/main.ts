@@ -9,13 +9,17 @@ import { GqlContext } from './shared/types/gql-context';
 import 'dotenv/config'; // Ensure .env is loaded
 import { getUserFromToken } from './shared/auth/auth.guard';
 import { FollowService } from './modules/follow/follow.service';
+// --- 1. IMPORT THE POSTS SERVICE ---
+import { PostsService } from './modules/posts/posts.service';
 
 // --- Create instances of our Services ---
 const prisma = new PrismaService();
 const usersService = new UsersService(prisma);
 const followService = new FollowService(prisma);
+// --- 2. CREATE THE POSTS SERVICE ---
+const postsService = new PostsService(prisma);
 
-// --- 2. Define the Server (use the new context type) ---
+// --- 3. Define the Server (use the new context type) ---
 const server = new ApolloServer<GqlContext>({
   typeDefs,
   resolvers,
@@ -33,6 +37,7 @@ async function startServer() {
         prisma,
         usersService,
         followService,
+        postsService, // <-- 4. ADD THE SERVICE TO THE CONTEXT
         currentUser,
       };
     },

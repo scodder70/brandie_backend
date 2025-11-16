@@ -18,8 +18,9 @@ describe('User Resolvers (Unit)', () => {
   const mockContext = {
     prisma: {} as any, // We're not using prisma in this unit test
     usersService: mockUsersService as any,
-    // --- THIS IS THE FIX ---
     followService: {} as any, // Add the missing mock service
+    // --- THIS IS THE FIX ---
+    postsService: {} as any, // Add the new missing mock service
     // -----------------------
     currentUser: null, // Add the missing property
   };

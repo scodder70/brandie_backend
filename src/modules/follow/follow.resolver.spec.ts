@@ -28,6 +28,9 @@ describe('Follow Resolvers (Unit)', () => {
     prisma: {} as any,
     usersService: {} as any,
     followService: mockFollowService as any,
+    // --- THIS IS THE FIX ---
+    postsService: {} as any,
+    // -----------------------
     currentUser: mockUser, // This user is "logged in"
   };
 
@@ -36,6 +39,9 @@ describe('Follow Resolvers (Unit)', () => {
     prisma: {} as any,
     usersService: {} as any,
     followService: mockFollowService as any,
+    // --- THIS IS THE FIX ---
+    postsService: {} as any,
+    // -----------------------
     currentUser: null, // No user is logged in
   };
 
