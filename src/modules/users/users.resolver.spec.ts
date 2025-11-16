@@ -9,6 +9,9 @@ describe('User Resolvers (Unit)', () => {
   // We just need to mock the 'createUser' method
   const mockUsersService = {
     createUser: jest.fn(), // Creates a spy function
+    // --- ADD THE MOCK FOR login ---
+    login: jest.fn(),
+    // ----------------------------
   };
 
   // 2. Create a mock context object
@@ -23,6 +26,9 @@ describe('User Resolvers (Unit)', () => {
   // Clear the mock's call history before each test
   beforeEach(() => {
     mockUsersService.createUser.mockClear();
+    // --- CLEAR THE login MOCK ---
+    mockUsersService.login.mockClear();
+    // --------------------------
   });
 
   // --- Our New "RED" Test ---
@@ -63,4 +69,39 @@ describe('User Resolvers (Unit)', () => {
     // Did the resolver return the correct user?
     expect(result).toBe(mockUser);
   });
+
+  // --- ADD THIS NEW "RED" TEST ---
+  it('login resolver should call usersService.login with correct args', async () => {
+    // 1. ARRANGE
+    const mockArgs = {
+      input: {
+        email: 'test@example.com',
+        password: 'password123',
+      },
+    };
+
+    const mockLoginResponse = {
+      token: 'fake.jwt.token',
+    };
+
+    // Tell the mock service what to return
+    mockUsersService.login.mockResolvedValue(mockLoginResponse);
+
+    // 2. ACT
+    // This will fail with "Resolver not implemented"
+    const result = await userResolvers.Mutation.login(
+      null, // _parent
+      mockArgs, // args
+      mockContext, // context
+    );
+
+    // 3. ASSERT
+    // Did the resolver call our service?
+    expect(mockUsersService.login).toHaveBeenCalledTimes(1);
+    // Did it call it with the right arguments?
+    expect(mockUsersService.login).toHaveBeenCalledWith(mockArgs.input);
+    // Did the resolver return the correct token?
+    expect(result).toBe(mockLoginResponse);
+  });
+  // -----------------------------
 });

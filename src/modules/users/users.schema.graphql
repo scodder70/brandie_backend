@@ -15,10 +15,27 @@ input CreateUserInput {
   password: String!
 }
 
+# --- ADD THESE NEW TYPES ---
+
+# Input for the login mutation
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+# Response from the login mutation
+type LoginResponse {
+  token: String!
+}
+
+# --- END OF NEW TYPES ---
+
 # This extends the root Mutation type
 type Mutation {
   # Our first mutation
   createUser(input: CreateUserInput!): User!
+  # --- ADD THIS NEW MUTATION ---
+  login(input: LoginInput!): LoginResponse!
 }
 
 # We need a dummy Query type to have a valid schema

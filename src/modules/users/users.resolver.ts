@@ -1,11 +1,23 @@
 import { GraphQLError } from 'graphql';
-import { CreateUserInput, PublicUser } from './users.types';
+// --- UPDATE IMPORTS ---
+import {
+  CreateUserInput,
+  PublicUser,
+  LoginInput,
+  LoginResponse,
+} from './users.types';
+// --------------------
 import { UsersService } from './users.service';
 import { PrismaService } from '@/shared/db/prisma.service';
 
 // This is the shape of the 'args' object our resolver will receive
 type CreateUserArgs = {
   input: CreateUserInput;
+};
+
+// --- ADD NEW ARGS TYPE ---
+type LoginArgs = {
+  input: LoginInput;
 };
 
 // This is the shape of the GraphQL 'context'
@@ -29,5 +41,17 @@ export const userResolvers = {
       // so we can trust it to do the work.
       return context.usersService.createUser(args.input);
     },
+
+    // --- ADD THIS NEW "RED" RESOLVER ---
+    login: async (
+      _parent: any,
+      args: LoginArgs,
+      context: GqlContext,
+    ): Promise<LoginResponse> => {
+      // TODO: Implement this
+      // It should just call context.usersService.login(args.input)
+      throw new Error('Resolver not implemented.');
+    },
+    // ---------------------------------
   },
 };
