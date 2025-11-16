@@ -38,4 +38,16 @@ export class FollowService {
       });
     }
   }
+
+  // --- ADD THIS SKELETON METHOD ---
+  async unfollowUser(
+    userIdToUnfollow: string,
+    currentUser: PublicUser,
+  ): Promise<void> {
+    // TODO: Implement this
+    // 1. Find the relation
+    // 2. If it exists, delete it
+    // 3. If it doesn't exist, throw an error
+    throw new Error('Method not implemented.');
+  }
 }

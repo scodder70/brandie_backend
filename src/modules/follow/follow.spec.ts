@@ -28,7 +28,7 @@ describe('FollowService (Integration)', () => {
     await prisma.$disconnect();
   });
 
-  // --- Our "Happy Path" Test ---
+  // --- THIS IS THE TEST THAT WAS BROKEN ---
   it('should allow user1 to follow user2', async () => {
     // 1. ARRANGE
     // Create two users
@@ -44,10 +44,9 @@ describe('FollowService (Integration)', () => {
     });
 
     // 2. ACT
-    // This is the line that will fail with "Method not implemented"
     await followService.followUser(user2.id, user1);
 
-    // 3. ASSERT (This part won't run until the test passes)
+    // 3. ASSERT
     const relation = await prisma.relation.findFirst({
       where: {
         followerId: user1.id,
@@ -56,9 +55,7 @@ describe('FollowService (Integration)', () => {
     });
     expect(relation).toBeDefined();
     expect(relation?.followerId).toBe(user1.id);
-  });
-
-  // --- ADD THESE 2 NEW "RED" TESTS ---
+  }); // <-- THIS '});' WAS MISSING
 
   it('should throw an error if a user tries to follow themselves', async () => {
     // 1. ARRANGE
@@ -95,5 +92,36 @@ describe('FollowService (Integration)', () => {
     await expect(
       followService.followUser(user2.id, user1),
     ).rejects.toThrow(new GraphQLError('You are already following this user'));
+  });
+
+  // --- THIS IS OUR NEW "RED" TEST ---
+  it('should allow user1 to unfollow user2', async () => {
+    // 1. ARRANGE
+    // Create user1 and user2
+    const user1 = await usersService.createUser({
+      username: 'user1',
+      email: 'user1@example.com',
+      password: 'password',
+    });
+    const user2 = await usersService.createUser({
+      username: 'user2',
+      email: 'user2@example.com',
+      password: 'password',
+    });
+    // Create the follow relationship
+    await followService.followUser(user2.id, user1);
+
+    // Verify the follow exists
+    const relation = await prisma.relation.findFirst();
+    expect(relation).toBeDefined();
+
+    // 2. ACT
+    // This is the line that will fail with "Method not implemented"
+    await followService.unfollowUser(user2.id, user1);
+
+    // 3. ASSERT
+    // Verify the follow no longer exists
+    const deletedRelation = await prisma.relation.findFirst();
+    expect(deletedRelation).toBeNull();
   });
 });
