@@ -42,15 +42,14 @@ export const userResolvers = {
       return context.usersService.createUser(args.input);
     },
 
-    // --- ADD THIS NEW "RED" RESOLVER ---
+    // --- THIS IS THE FIX ---
     login: async (
       _parent: any,
       args: LoginArgs,
       context: GqlContext,
     ): Promise<LoginResponse> => {
-      // TODO: Implement this
-      // It should just call context.usersService.login(args.input)
-      throw new Error('Resolver not implemented.');
+      // The resolver's only job is to call the service.
+      return context.usersService.login(args.input);
     },
     // ---------------------------------
   },
