@@ -19,8 +19,6 @@ export const followResolvers = {
       args: FollowUserArgs,
       context: GqlContextWithFollow,
     ): Promise<boolean> => {
-      // --- THIS IS THE IMPLEMENTATION ---
-
       // 1. Check if user is logged in
       if (!context.currentUser) {
         throw new GraphQLError('You must be logged in to follow users', {
@@ -38,17 +36,27 @@ export const followResolvers = {
       return true;
     },
 
-    // --- ADD THIS SKELETON RESOLVER ---
+    // --- IMPLEMENT THIS RESOLVER ---
     unfollowUser: async (
       _parent: any,
       args: FollowUserArgs, // Re-uses the same args type
       context: GqlContextWithFollow,
     ): Promise<boolean> => {
-      // TODO: Implement this
-      // 1. Check if context.currentUser exists
-      // 2. Call context.followService.unfollowUser(args.userId, context.currentUser)
-      // 3. Return true
-      throw new Error('Method not implemented.');
+      // 1. Check if user is logged in
+      if (!context.currentUser) {
+        throw new GraphQLError('You must be logged in to unfollow users', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
+      }
+
+      // 2. Call the (already tested) service
+      await context.followService.unfollowUser(
+        args.userId,
+        context.currentUser,
+      );
+
+      // 3. Return true on success
+      return true;
     },
   },
 };
