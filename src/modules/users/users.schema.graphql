@@ -1,0 +1,27 @@
+# This defines the "shape" of our User for the API
+# Notice it does NOT include the password
+type User {
+  id: ID!
+  createdAt: String!
+  updatedAt: String!
+  username: String!
+  email: String!
+}
+
+# This defines the input object for our createUser mutation
+input CreateUserInput {
+  username: String!
+  email: String!
+  password: String!
+}
+
+# This extends the root Mutation type
+type Mutation {
+  # Our first mutation
+  createUser(input: CreateUserInput!): User!
+}
+
+# We need a dummy Query type to have a valid schema
+type Query {
+  _empty: String
+}
