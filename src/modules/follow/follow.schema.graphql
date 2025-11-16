@@ -6,4 +6,11 @@ type Mutation {
   Returns 'true' if the follow was successful.
   """
   followUser(userId: ID!): Boolean!
+
+  """
+  Allows the currently authenticated user to unfollow another user.
+  Takes the ID of the user to unfollow as input.
+  Returns 'true' if the unfollow was successful.
+  """
+  unfollowUser(userId: ID!): Boolean!
 }

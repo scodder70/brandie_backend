@@ -37,5 +37,18 @@ export const followResolvers = {
       // 3. Return true on success
       return true;
     },
+
+    // --- ADD THIS SKELETON RESOLVER ---
+    unfollowUser: async (
+      _parent: any,
+      args: FollowUserArgs, // Re-uses the same args type
+      context: GqlContextWithFollow,
+    ): Promise<boolean> => {
+      // TODO: Implement this
+      // 1. Check if context.currentUser exists
+      // 2. Call context.followService.unfollowUser(args.userId, context.currentUser)
+      // 3. Return true
+      throw new Error('Method not implemented.');
+    },
   },
 };

@@ -8,6 +8,8 @@ describe('Follow Resolvers (Unit)', () => {
   // 1. Create a MOCK version of the FollowService
   const mockFollowService = {
     followUser: jest.fn(),
+    // --- ADD THE NEW MOCK ---
+    unfollowUser: jest.fn(),
   };
 
   // 2. Create a mock user for the context
@@ -38,6 +40,8 @@ describe('Follow Resolvers (Unit)', () => {
   // Clear mock history before each test
   beforeEach(() => {
     mockFollowService.followUser.mockClear();
+    // --- CLEAR THE NEW MOCK ---
+    mockFollowService.unfollowUser.mockClear();
   });
 
   // --- Our "Happy Path" Test ---
@@ -63,7 +67,6 @@ describe('Follow Resolvers (Unit)', () => {
     expect(result).toBe(true);
   });
 
-  // --- ADD THIS NEW "RED" TEST ---
   it('should throw an auth error if no user is in context', async () => {
     // 1. ARRANGE
     const mockArgs = { userId: 'user-to-follow-id' };
@@ -80,4 +83,30 @@ describe('Follow Resolvers (Unit)', () => {
       new GraphQLError('You must be logged in to follow users'),
     );
   });
+
+  // --- ADD THIS NEW "RED" TEST ---
+  it('should call followService.unfollowUser with correct args', async () => {
+    // 1. ARRANGE
+    const mockArgs = { userId: 'user-to-unfollow-id' };
+    // Tell the mock service to resolve successfully
+    mockFollowService.unfollowUser.mockResolvedValue(undefined);
+
+    // 2. ACT
+    // This will fail with "Method not implemented"
+    const result = await followResolvers.Mutation.unfollowUser(
+      null, // _parent
+      mockArgs, // args
+      mockContext, // context
+    );
+
+    // 3. ASSERT
+    expect(mockFollowService.unfollowUser).toHaveBeenCalledTimes(1);
+    expect(mockFollowService.unfollowUser).toHaveBeenCalledWith(
+      mockArgs.userId,
+      mockUser,
+    );
+    expect(result).toBe(true);
+  });
+
+  // it.todo('should throw an auth error if no user is in context for unfollowUser');
 });
