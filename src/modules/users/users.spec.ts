@@ -92,5 +92,33 @@ describe('UsersService (Integration)', () => {
     }
   });
 
-  // it('should not create a user with a duplicate username');
+  // --- ADD THIS NEW TEST ---
+  it('should throw an error if the username is already taken', async () => {
+    // 1. ARRANGE
+    // First, create a user
+    const userData1: CreateUserInput = {
+      username: 'duplicateuser',
+      email: 'user1@example.com',
+      password: 'password123',
+    };
+    await usersService.createUser(userData1);
+
+    // Now, define a second user with the SAME username
+    const userData2: CreateUserInput = {
+      username: 'duplicateuser',
+      email: 'user2@example.com',
+      password: 'password456',
+    };
+
+    // 2. ACT & 3. ASSERT
+    expect.assertions(2);
+    try {
+      await usersService.createUser(userData2);
+    } catch (error) {
+      expect(error).toBeInstanceOf(GraphQLError);
+      expect((error as GraphQLError).message).toBe(
+        'User with this email or username already exists',
+      );
+    }
+  });
 });
