@@ -1,6 +1,8 @@
 import { PrismaService } from '@/shared/db/prisma.service';
 import { UsersService } from '@/modules/users/users.service';
 import { FollowService } from './follow.service';
+// --- IMPORT GraphQLError ---
+import { GraphQLError } from 'graphql';
 
 describe('FollowService (Integration)', () => {
   let usersService: UsersService;
@@ -26,7 +28,7 @@ describe('FollowService (Integration)', () => {
     await prisma.$disconnect();
   });
 
-  // --- Our New "RED" Test ---
+  // --- Our "Happy Path" Test ---
   it('should allow user1 to follow user2', async () => {
     // 1. ARRANGE
     // Create two users
@@ -56,6 +58,42 @@ describe('FollowService (Integration)', () => {
     expect(relation?.followerId).toBe(user1.id);
   });
 
-  // it.todo('should not allow a user to follow themselves');
-  // it.todo('should not create a duplicate follow relation');
+  // --- ADD THESE 2 NEW "RED" TESTS ---
+
+  it('should throw an error if a user tries to follow themselves', async () => {
+    // 1. ARRANGE
+    const user1 = await usersService.createUser({
+      username: 'user1',
+      email: 'user1@example.com',
+      password: 'password',
+    });
+
+    // 2. ACT & 3. ASSERT
+    // We expect this to fail with the specific error
+    await expect(
+      followService.followUser(user1.id, user1),
+    ).rejects.toThrow(new GraphQLError('You cannot follow yourself'));
+  });
+
+  it('should throw an error if a user tries to follow someone they already follow', async () => {
+    // 1. ARRANGE
+    const user1 = await usersService.createUser({
+      username: 'user1',
+      email: 'user1@example.com',
+      password: 'password',
+    });
+    const user2 = await usersService.createUser({
+      username: 'user2',
+      email: 'user2@example.com',
+      password: 'password',
+    });
+    // Follow them once
+    await followService.followUser(user2.id, user1);
+
+    // 2. ACT & 3. ASSERT
+    // Now, try to follow them a second time
+    await expect(
+      followService.followUser(user2.id, user1),
+    ).rejects.toThrow(new GraphQLError('You are already following this user'));
+  });
 });
