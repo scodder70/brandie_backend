@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    /* Base Options */
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    /* Strict Type-Checking */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": false, // False, as Prisma handles this
+
+    /* Module Resolution */
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "@/src/*": ["src/*"],
+      "@/modules/*": ["src/modules/*"],
+      "@/shared/*": ["src/shared/*"],
+      "@/config/*": ["src/config/*"]
+    },
+
+    /* Decorators (for GraphQL) */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* Build Options */
+    "rootDir": "src",
+    "outDir": "dist",
+    "resolveJsonModule": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "tests/**/*.ts"]
+}
