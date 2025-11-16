@@ -2,6 +2,8 @@
 import { PrismaService } from '@/shared/db/prisma.service';
 import { UsersService } from './users.service';
 import { CreateUserInput } from './users.types';
+// Import the error we expect
+import { GraphQLError } from 'graphql';
 
 describe('UsersService (Integration)', () => {
   let usersService: UsersService;
@@ -40,7 +42,6 @@ describe('UsersService (Integration)', () => {
     };
 
     // 2. ACT
-    // This is the line that will fail, because createUser is not implemented
     const user = await usersService.createUser(userData);
 
     // 3. ASSERT
@@ -59,6 +60,37 @@ describe('UsersService (Integration)', () => {
     expect(dbUser?.password).not.toBe(userData.password);
   });
 
-  // it('should not create a user with a duplicate email');
+  // --- THIS IS OUR NEW "RED" TEST ---
+  it('should throw an error if the email is already taken', async () => {
+    // 1. ARRANGE
+    // First, create a user
+    const userData1: CreateUserInput = {
+      username: 'user1',
+      email: 'duplicate@example.com',
+      password: 'password123',
+    };
+    await usersService.createUser(userData1);
+
+    // Now, define a second user with the SAME email
+    const userData2: CreateUserInput = {
+      username: 'user2',
+      email: 'duplicate@example.com',
+      password: 'password456',
+    };
+
+    // 2. ACT & 3. ASSERT
+    // We expect this to fail
+    // We use expect.assertions() to ensure the async error is caught
+    expect.assertions(2);
+    try {
+      await usersService.createUser(userData2);
+    } catch (error) {
+      expect(error).toBeInstanceOf(GraphQLError);
+      expect((error as GraphQLError).message).toBe(
+        'User with this email or username already exists',
+      );
+    }
+  });
+
   // it('should not create a user with a duplicate username');
 });
