@@ -36,7 +36,7 @@ describe('PostsService (Integration)', () => {
     await prisma.$disconnect();
   });
 
-  // --- THIS IS OUR NEW "RED" TEST ---
+  // --- Our "Happy Path" Test ---
   it('should create a new post with text content', async () => {
     // 1. ARRANGE
     const postInput = {
@@ -57,5 +57,22 @@ describe('PostsService (Integration)', () => {
     const dbPost = await prisma.post.findUnique({ where: { id: post.id } });
     expect(dbPost).toBeDefined();
     expect(dbPost?.authorId).toBe(testUser.id);
+  });
+
+  // --- ADD THIS NEW "RED" TEST ---
+  it('should throw an error if a post has no text or mediaUrl', async () => {
+    // 1. ARRANGE
+    const emptyPostInput = {
+      text: null,
+      mediaUrl: null,
+    };
+
+    // 2. ACT & 3. ASSERT
+    // We expect this to fail with the specific error
+    await expect(
+      postsService.createPost(emptyPostInput, testUser),
+    ).rejects.toThrow(
+      new GraphQLError('A post must have either text or a media URL.'),
+    );
   });
 });
