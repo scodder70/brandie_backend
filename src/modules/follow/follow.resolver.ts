@@ -13,7 +13,6 @@ export type GqlContextWithFollow = GqlContext & {
 };
 
 export const followResolvers = {
-  // --- IMPLEMENT THIS QUERY ---
   Query: {
     following: async (
       _parent: any,
@@ -24,8 +23,20 @@ export const followResolvers = {
       // This query is public, so no auth check is needed
       return context.followService.getFollowing(args.userId);
     },
+
+    // --- ADD THIS SKELETON ---
+    followers: async (
+      _parent: any,
+      args: FollowUserArgs, // Re-uses the same args type
+      context: GqlContextWithFollow,
+    ) => {
+      // TODO: Implement this
+      // 1. Call context.followService.getFollowers(args.userId)
+      // 2. Return the list of users
+      throw new Error('Method not implemented.');
+    },
+    // -------------------------
   },
-  // ---------------------------------
 
   Mutation: {
     followUser: async (

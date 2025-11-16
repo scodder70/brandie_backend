@@ -6,6 +6,12 @@ type Query {
   Takes the ID of the user to check.
   """
   following(userId: ID!): [User!]!
+
+  """
+  Gets a list of users that are following a specific user.
+  Takes the ID of the user to check.
+  """
+  followers(userId: ID!): [User!]!
 }
 
 # We're extending the root Mutation type
