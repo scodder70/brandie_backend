@@ -64,12 +64,21 @@ export class FollowService {
     // 3. If count > 0, the unfollow was successful. Return void.
   }
 
-  // --- ADD THIS SKELETON METHOD ---
+  // --- IMPLEMENT THIS METHOD ---
   async getFollowing(userId: string): Promise<User[]> {
-    // TODO: Implement this
     // 1. Find all 'Relations' where 'followerId' is 'userId'
-    // 2. Include the 'following' user data for each relation
+    const relations = await this.prisma.relation.findMany({
+      where: {
+        followerId: userId,
+      },
+      // 2. Include the 'following' user data for each relation
+      include: {
+        following: true, // This "includes" the User object
+      },
+    });
+
     // 3. Return the list of users
-    throw new Error('Method not implemented.');
+    // We map over the relations and return just the 'following' user object
+    return relations.map((relation) => relation.following);
   }
 }
