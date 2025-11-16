@@ -28,7 +28,6 @@ describe('FollowService (Integration)', () => {
     await prisma.$disconnect();
   });
 
-  // --- THIS IS THE TEST THAT WAS BROKEN ---
   it('should allow user1 to follow user2', async () => {
     // 1. ARRANGE
     // Create two users
@@ -55,7 +54,7 @@ describe('FollowService (Integration)', () => {
     });
     expect(relation).toBeDefined();
     expect(relation?.followerId).toBe(user1.id);
-  }); // <-- THIS '});' WAS MISSING
+  });
 
   it('should throw an error if a user tries to follow themselves', async () => {
     // 1. ARRANGE
@@ -145,7 +144,6 @@ describe('FollowService (Integration)', () => {
     ).rejects.toThrow(new GraphQLError('You are not following this user'));
   });
 
-  // --- THIS IS OUR NEW "RED" TEST ---
   it('should return a list of users that a user is following', async () => {
     // 1. ARRANGE
     // Create 3 users
@@ -169,7 +167,6 @@ describe('FollowService (Integration)', () => {
     await followService.followUser(user3.id, user1);
 
     // 2. ACT
-    // This will fail with "Method not implemented"
     const followingList = await followService.getFollowing(user1.id);
 
     // 3. ASSERT
@@ -179,5 +176,42 @@ describe('FollowService (Integration)', () => {
     const followingIds = followingList.map((user) => user.id);
     expect(followingIds).toContain(user2.id);
     expect(followingIds).toContain(user3.id);
+  });
+
+  // --- THIS IS OUR NEW "RED" TEST ---
+  it('should return a list of users that are followers of a user', async () => {
+    // 1. ARRANGE
+    // Create 3 users
+    const user1 = await usersService.createUser({
+      username: 'user1',
+      email: 'user1@example.com',
+      password: 'password',
+    });
+    const user2 = await usersService.createUser({
+      username: 'user2',
+      email: 'user2@example.com',
+      password: 'password',
+    });
+    const user3 = await usersService.createUser({
+      username: 'user3',
+      email: 'user3@example.com',
+      password: 'password',
+    });
+
+    // user2 and user3 follow user1
+    await followService.followUser(user1.id, user2);
+    await followService.followUser(user1.id, user3);
+
+    // 2. ACT
+    // This will fail with "Method not implemented"
+    const followersList = await followService.getFollowers(user1.id);
+
+    // 3. ASSERT
+    expect(followersList).toBeDefined();
+    expect(followersList.length).toBe(2);
+    // Check that the list contains the correct user IDs
+    const followerIds = followersList.map((user) => user.id);
+    expect(followerIds).toContain(user2.id);
+    expect(followerIds).toContain(user3.id);
   });
 });
