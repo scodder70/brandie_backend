@@ -94,7 +94,6 @@ describe('FollowService (Integration)', () => {
     ).rejects.toThrow(new GraphQLError('You are already following this user'));
   });
 
-  // --- THIS IS OUR NEW "RED" TEST ---
   it('should allow user1 to unfollow user2', async () => {
     // 1. ARRANGE
     // Create user1 and user2
@@ -116,7 +115,6 @@ describe('FollowService (Integration)', () => {
     expect(relation).toBeDefined();
 
     // 2. ACT
-    // This is the line that will fail with "Method not implemented"
     await followService.unfollowUser(user2.id, user1);
 
     // 3. ASSERT
@@ -125,7 +123,6 @@ describe('FollowService (Integration)', () => {
     expect(deletedRelation).toBeNull();
   });
 
-  // --- THIS IS THE TEST FROM THE LAST STEP ---
   it('should throw an error if a user tries to unfollow someone they do not follow', async () => {
     // 1. ARRANGE
     // Create user1 and user2
@@ -146,5 +143,41 @@ describe('FollowService (Integration)', () => {
     await expect(
       followService.unfollowUser(user2.id, user1),
     ).rejects.toThrow(new GraphQLError('You are not following this user'));
+  });
+
+  // --- THIS IS OUR NEW "RED" TEST ---
+  it('should return a list of users that a user is following', async () => {
+    // 1. ARRANGE
+    // Create 3 users
+    const user1 = await usersService.createUser({
+      username: 'user1',
+      email: 'user1@example.com',
+      password: 'password',
+    });
+    const user2 = await usersService.createUser({
+      username: 'user2',
+      email: 'user2@example.com',
+      password: 'password',
+    });
+    const user3 = await usersService.createUser({
+      username: 'user3',
+      email: 'user3@example.com',
+      password: 'password',
+    });
+    // user1 follows user2 and user3
+    await followService.followUser(user2.id, user1);
+    await followService.followUser(user3.id, user1);
+
+    // 2. ACT
+    // This will fail with "Method not implemented"
+    const followingList = await followService.getFollowing(user1.id);
+
+    // 3. ASSERT
+    expect(followingList).toBeDefined();
+    expect(followingList.length).toBe(2);
+    // Check that the list contains the correct user IDs
+    const followingIds = followingList.map((user) => user.id);
+    expect(followingIds).toContain(user2.id);
+    expect(followingIds).toContain(user3.id);
   });
 });

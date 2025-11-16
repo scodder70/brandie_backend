@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import { GraphQLError } from 'graphql';
 import { PublicUser } from '../users/users.types';
 
@@ -39,7 +39,6 @@ export class FollowService {
     }
   }
 
-  // --- IMPLEMENT THIS METHOD ---
   async unfollowUser(
     userIdToUnfollow: string,
     currentUser: PublicUser,
@@ -63,5 +62,14 @@ export class FollowService {
     }
 
     // 3. If count > 0, the unfollow was successful. Return void.
+  }
+
+  // --- ADD THIS SKELETON METHOD ---
+  async getFollowing(userId: string): Promise<User[]> {
+    // TODO: Implement this
+    // 1. Find all 'Relations' where 'followerId' is 'userId'
+    // 2. Include the 'following' user data for each relation
+    // 3. Return the list of users
+    throw new Error('Method not implemented.');
   }
 }
