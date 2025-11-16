@@ -1,0 +1,21 @@
+services:
+  # This service defines our PostgreSQL database
+  db:
+    image: postgres:15
+    container_name: brandie-db
+    restart: always
+    ports:
+      # Makes the database accessible from your computer on port 5432
+      - "5432:5432"
+    environment:
+      # These are the credentials Prisma will use to connect
+      POSTGRES_USER: brandie
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: brandie_dev # The main development database
+    volumes:
+      # This saves your data even if you stop the container
+      - postgres-data:/var/lib/postgresql/data
+
+  # This just defines the volume we named above
+volumes:
+  postgres-data:
