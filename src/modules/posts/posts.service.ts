@@ -38,7 +38,6 @@ export class PostsService {
     }
   }
 
-  // --- IMPLEMENT THIS METHOD ---
   async getPostsForUser(userId: string): Promise<Post[]> {
     // 1. Find all posts where 'authorId' matches 'userId'
     const posts = await this.prisma.post.findMany({
@@ -53,5 +52,40 @@ export class PostsService {
 
     // 3. Return the list of posts
     return posts;
+  }
+
+  // --- GREEN IMPLEMENTATION: getTimeline ---
+  async getTimeline(currentUser: PublicUser): Promise<Post[]> {
+    // 1. Get IDs of all users the current user follows
+    const followedRelations = await this.prisma.relation.findMany({
+      where: {
+        followerId: currentUser.id,
+      },
+      select: {
+        followingId: true,
+      },
+    });
+
+    // Extract the following IDs and add the current user's ID
+    const followedIds = followedRelations.map(
+      (relation) => relation.followingId,
+    );
+    // Include the current user's own posts
+    const userIds = [currentUser.id, ...followedIds];
+
+    // 2. Fetch posts from all users in the ID list
+    const timelinePosts = await this.prisma.post.findMany({
+      where: {
+        authorId: {
+          in: userIds, // Use the 'in' operator to select multiple author IDs
+        },
+      },
+      // 3. Order them by 'createdAt' (newest first)
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return timelinePosts;
   }
 }

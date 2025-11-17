@@ -7,27 +7,26 @@ type CreatePostArgs = {
   input: CreatePostInput;
 };
 
-// --- ADD THIS NEW TYPE ---
 type PostsQueryArgs = {
   userId: string;
 };
 
 export const postsResolvers = {
   Query: {
-    // --- THE FIX / GREEN IMPLEMENTATION ---
+    // --- IMPLEMENTED QUERY ---
     posts: async (
       _parent: any,
       args: PostsQueryArgs,
       context: GqlContext,
     ) => {
-      // 1. Call context.postsService.getPostsForUser(args.userId)
+      // 1. Call the (already tested) service
+      // This query is public, so no auth check is needed
       return context.postsService.getPostsForUser(args.userId);
     },
     // -------------------------------
   },
 
   Mutation: {
-    // --- RESTORED GREEN IMPLEMENTATION ---
     createPost: async (
       _parent: any,
       args: CreatePostArgs,
@@ -49,6 +48,5 @@ export const postsResolvers = {
       // 3. Return the new post
       return newPost;
     },
-    // ------------------------------------
   },
 };
