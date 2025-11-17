@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
-    "lib": ["ES2020"],
+    "lib": ["ES2020", "DOM"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
@@ -22,8 +22,12 @@
     "rootDir": "src",
     "outDir": "dist",
     "resolveJsonModule": true,
-    "sourceMap": true
+    "sourceMap": true,
+    // Explicitly include types for Node.js globals and Jest testing environment
+    "types": ["node", "jest"]
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "tests/**/*.ts"]
+  // We only include files directly related to the application source code.
+  "include": ["src/**/*.ts"], 
+  // We explicitly exclude test files, as they should only be run by Jest/ts-jest.
+  "exclude": ["node_modules", "dist", "tests/**/*.ts"] 
 }
