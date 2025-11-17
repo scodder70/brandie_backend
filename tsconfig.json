@@ -22,12 +22,17 @@
     "rootDir": "src",
     "outDir": "dist",
     "resolveJsonModule": true,
-    "sourceMap": true,
-    // Explicitly include types for Node.js globals and Jest testing environment
-    "types": ["node", "jest"]
+    "sourceMap": true
   },
   // We only include files directly related to the application source code.
   "include": ["src/**/*.ts"], 
-  // We explicitly exclude test files, as they should only be run by Jest/ts-jest.
-  "exclude": ["node_modules", "dist", "tests/**/*.ts"] 
+  // We explicitly exclude test files and configuration files from the build.
+  "exclude": [
+    "node_modules", 
+    "dist", 
+    "tests/**/*.ts",
+    "**/*.spec.ts",    // Exclude all unit/integration test files
+    "jest.config.js",
+    "prisma.config.ts"
+  ] 
 }
