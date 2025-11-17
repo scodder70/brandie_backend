@@ -75,7 +75,7 @@ describe('PostsService (Integration)', () => {
     );
   });
 
-  // --- THIS IS THE TEST WE ARE FIXING ---
+  // --- ADD THIS NEW "RED" TEST ---
   it('should return all posts for a specific user', async () => {
     // 1. ARRANGE
     // Create another user
@@ -86,15 +86,22 @@ describe('PostsService (Integration)', () => {
     });
 
     // testUser creates 2 posts
-    // --- ADD mediaUrl: null ---
-    await postsService.createPost({ text: 'Post 1', mediaUrl: null }, testUser);
+    await postsService.createPost(
+      { text: 'Post 1', mediaUrl: null },
+      testUser,
+    );
     // We add a small delay to ensure 'createdAt' is different
-    // --- ADD mediaUrl: null ---
-    await postsService.createPost({ text: 'Post 2', mediaUrl: null }, testUser);
+    await new Promise((r) => setTimeout(r, 10));
+    await postsService.createPost(
+      { text: 'Post 2', mediaUrl: null },
+      testUser,
+    );
 
     // otherUser creates 1 post
-    // --- ADD mediaUrl: null ---
-    await postsService.createPost({ text: 'Post 3', mediaUrl: null }, otherUser);
+    await postsService.createPost(
+      { text: 'Post 3', mediaUrl: null },
+      otherUser,
+    );
 
     // 2. ACT
     // This will fail with "Method not implemented"
