@@ -6,8 +6,9 @@ describe('Posts Resolvers (Unit)', () => {
   // 1. Create a MOCK version of the PostsService
   const mockPostsService = {
     createPost: jest.fn(),
-    // --- ADD THE NEW MOCK ---
     getPostsForUser: jest.fn(),
+    // --- ADD THE NEW MOCK ---
+    getTimeline: jest.fn(),
     // ------------------------
   };
 
@@ -21,7 +22,7 @@ describe('Posts Resolvers (Unit)', () => {
   };
 
   // 3. Create a mock context (authenticated)
-  const mockContext = {
+  const mockContext: GqlContext = {
     prisma: {} as any,
     usersService: {} as any,
     followService: {} as any,
@@ -30,7 +31,7 @@ describe('Posts Resolvers (Unit)', () => {
   };
 
   // 4. Create a mock context (logged out)
-  const mockContextLoggedOut = {
+  const mockContextLoggedOut: GqlContext = {
     ...mockContext,
     currentUser: null,
   };
@@ -38,8 +39,9 @@ describe('Posts Resolvers (Unit)', () => {
   // Clear mock history before each test
   beforeEach(() => {
     mockPostsService.createPost.mockClear();
-    // --- CLEAR THE NEW MOCK ---
     mockPostsService.getPostsForUser.mockClear();
+    // --- CLEAR THE NEW MOCK ---
+    mockPostsService.getTimeline.mockClear();
     // --------------------------
   });
 
@@ -105,7 +107,7 @@ describe('Posts Resolvers (Unit)', () => {
     });
   });
 
-  // --- ADD THE NEW QUERY TESTS ---
+  // --- QUERY TESTS ---
   describe('Query', () => {
     it('posts query should call postsService.getPostsForUser with correct args', async () => {
       // 1. ARRANGE
@@ -131,6 +133,46 @@ describe('Posts Resolvers (Unit)', () => {
       );
       expect(result).toBe(mockPostList);
     });
+
+    // --- ADD THE NEW RED TEST: timeline ---
+    it('timeline query should call postsService.getTimeline when authenticated', async () => {
+      // 1. ARRANGE
+      const mockPostList = [{ id: 'p1', text: 'from timeline' }];
+      // Tell the mock service what to return
+      mockPostsService.getTimeline.mockResolvedValue(mockPostList as any);
+
+      // 2. ACT
+      // This will fail because the resolver isn't implemented yet
+      const result = await postsResolvers.Query.timeline(
+        null, // _parent
+        {}, // args
+        mockContext, // context (authenticated)
+      );
+
+      // 3. ASSERT
+      expect(mockPostsService.getTimeline).toHaveBeenCalledTimes(1);
+      // Ensure it's called with the current authenticated user
+      expect(mockPostsService.getTimeline).toHaveBeenCalledWith(mockUser);
+      expect(result).toBe(mockPostList);
+    });
+
+    it('timeline query should throw UNAUTHENTICATED error if logged out', async () => {
+      // 1. ARRANGE
+      // No setup needed, just use the logged out context
+
+      // 2. ACT & 3. ASSERT
+      await expect(
+        postsResolvers.Query.timeline(
+          null, // _parent
+          {}, // args
+          mockContextLoggedOut, // context (logged out)
+        ),
+      ).rejects.toThrow(
+        new GraphQLError('You must be logged in to view your timeline'),
+      );
+
+      // Should not call the service
+      expect(mockPostsService.getTimeline).not.toHaveBeenCalled();
+    });
   });
-  // -----------------------------
 });

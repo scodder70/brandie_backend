@@ -7,26 +7,43 @@ type CreatePostArgs = {
   input: CreatePostInput;
 };
 
+// --- ADD THIS NEW TYPE ---
 type PostsQueryArgs = {
   userId: string;
 };
 
 export const postsResolvers = {
   Query: {
-    // --- IMPLEMENTED QUERY ---
+    // RESTORED GREEN IMPLEMENTATION: Query.posts
     posts: async (
       _parent: any,
       args: PostsQueryArgs,
       context: GqlContext,
     ) => {
-      // 1. Call the (already tested) service
-      // This query is public, so no auth check is needed
+      // 1. Call context.postsService.getPostsForUser(args.userId)
       return context.postsService.getPostsForUser(args.userId);
     },
-    // -------------------------------
+
+    // --- NEW GREEN IMPLEMENTATION: Query.timeline ---
+    timeline: async (
+      _parent: any,
+      _args: any,
+      context: GqlContext,
+    ) => {
+      // 1. Check if user is logged in
+      if (!context.currentUser) {
+        throw new GraphQLError('You must be logged in to view your timeline', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
+      }
+
+      // 2. Call the (already tested) service
+      return context.postsService.getTimeline(context.currentUser);
+    },
   },
 
   Mutation: {
+    // RESTORED GREEN IMPLEMENTATION: Mutation.createPost
     createPost: async (
       _parent: any,
       args: CreatePostArgs,

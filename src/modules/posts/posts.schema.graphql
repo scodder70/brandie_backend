@@ -2,13 +2,17 @@
 # We can include the author User object
 type Post {
   id: ID!
-# ... existing code ...
+  createdAt: String!
+  updatedAt: String!
+  text: String
+  mediaUrl: String
   author: User! # We can fetch the author for each post
 }
 
 # Define the input for creating a post
 input CreatePostInput {
-# ... existing code ...
+  text: String
+  mediaUrl: String
 }
 
 # Extend the root Query type
@@ -17,6 +21,12 @@ type Query {
   Retrieves all posts created by a specific user ID, ordered by newest first.
   """
   posts(userId: ID!): [Post!]!
+  
+  # --- ADD THIS NEW QUERY ---
+  """
+  Retrieves the authenticated user's timeline: posts from followed users + user's own posts.
+  """
+  timeline: [Post!]!
 }
 
 # Extend the root Mutation type
