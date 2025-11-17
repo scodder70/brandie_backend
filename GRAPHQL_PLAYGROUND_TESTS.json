@@ -1,0 +1,333 @@
+{
+  "graphql_playground_tests": {
+    "description": "Collection of GraphQL queries and mutations for manual testing in GraphQL Playground based on spec files",
+    "note": "Use these in GraphQL Playground (http://localhost:3000/graphql) to test the API endpoints",
+    
+    "mutations": {
+      "user_mutations": {
+        "createUser": {
+          "description": "Create a new user with username, email, and password",
+          "test_case_1": {
+            "name": "Create user - successful",
+            "query": "mutation {\n  createUser(input: {\n    username: \"testuser\"\n    email: \"test@example.com\"\n    password: \"password123\"\n  }) {\n    id\n    username\n    email\n    createdAt\n    updatedAt\n  }\n}"
+          },
+          "test_case_2": {
+            "name": "Create user - duplicate email should fail",
+            "query": "mutation {\n  createUser(input: {\n    username: \"testuser2\"\n    email: \"test@example.com\"\n    password: \"password456\"\n  }) {\n    id\n    username\n    email\n  }\n}",
+            "expected_error": "User with this email or username already exists"
+          },
+          "test_case_3": {
+            "name": "Create user - duplicate username should fail",
+            "query": "mutation {\n  createUser(input: {\n    username: \"testuser\"\n    email: \"different@example.com\"\n    password: \"password456\"\n  }) {\n    id\n    username\n    email\n  }\n}",
+            "expected_error": "User with this email or username already exists"
+          }
+        },
+        "login": {
+          "description": "Authenticate user and get JWT token",
+          "test_case_1": {
+            "name": "Login - successful with valid credentials",
+            "prerequisites": "Create a user first with email 'login@example.com' and password 'strongpassword123'",
+            "query": "mutation {\n  login(input: {\n    email: \"login@example.com\"\n    password: \"strongpassword123\"\n  }) {\n    token\n  }\n}"
+          },
+          "test_case_2": {
+            "name": "Login - invalid email should fail",
+            "query": "mutation {\n  login(input: {\n    email: \"nonexistent@example.com\"\n    password: \"anypassword\"\n  }) {\n    token\n  }\n}",
+            "expected_error": "Invalid email or password"
+          },
+          "test_case_3": {
+            "name": "Login - wrong password should fail",
+            "prerequisites": "Create a user first",
+            "query": "mutation {\n  login(input: {\n    email: \"login@example.com\"\n    password: \"wrongpassword\"\n  }) {\n    token\n  }\n}",
+            "expected_error": "Invalid email or password"
+          }
+        }
+      },
+      "post_mutations": {
+        "createPost": {
+          "description": "Create a new post (requires authentication)",
+          "test_case_1": {
+            "name": "Create post - with text only",
+            "prerequisites": "User must be logged in (set Authorization header with JWT token)",
+            "query": "mutation {\n  createPost(input: {\n    text: \"This is my first post!\"\n    mediaUrl: null\n  }) {\n    id\n    text\n    mediaUrl\n    author {\n      id\n      username\n      email\n    }\n    createdAt\n    updatedAt\n  }\n}"
+          },
+          "test_case_2": {
+            "name": "Create post - with text and media",
+            "prerequisites": "User must be logged in",
+            "query": "mutation {\n  createPost(input: {\n    text: \"Check out this image!\"\n    mediaUrl: \"https://example.com/image.jpg\"\n  }) {\n    id\n    text\n    mediaUrl\n    author {\n      id\n      username\n    }\n    createdAt\n  }\n}"
+          },
+          "test_case_3": {
+            "name": "Create post - without authentication should fail",
+            "query": "mutation {\n  createPost(input: {\n    text: \"This should fail\"\n    mediaUrl: null\n  }) {\n    id\n    text\n  }\n}",
+            "expected_error": "You must be logged in to create a post"
+          },
+          "test_case_4": {
+            "name": "Create post - empty content should fail",
+            "prerequisites": "User must be logged in",
+            "query": "mutation {\n  createPost(input: {\n    text: null\n    mediaUrl: null\n  }) {\n    id\n    text\n  }\n}",
+            "expected_error": "A post must have either text or a media URL."
+          }
+        }
+      },
+      "follow_mutations": {
+        "followUser": {
+          "description": "Follow another user (requires authentication)",
+          "test_case_1": {
+            "name": "Follow user - successful",
+            "prerequisites": "User must be logged in, create another user first with id 'user-2'",
+            "query": "mutation {\n  followUser(userId: \"user-2\")\n}"
+          },
+          "test_case_2": {
+            "name": "Follow user - cannot follow yourself",
+            "prerequisites": "User must be logged in, get your own user ID",
+            "query": "mutation {\n  followUser(userId: \"your-own-user-id\")\n}",
+            "expected_error": "You cannot follow yourself"
+          },
+          "test_case_3": {
+            "name": "Follow user - already following should fail",
+            "prerequisites": "User must be logged in and already following 'user-2'",
+            "query": "mutation {\n  followUser(userId: \"user-2\")\n}",
+            "expected_error": "You are already following this user"
+          }
+        },
+        "unfollowUser": {
+          "description": "Unfollow a user (requires authentication)",
+          "test_case_1": {
+            "name": "Unfollow user - successful",
+            "prerequisites": "User must be logged in and currently following 'user-2'",
+            "query": "mutation {\n  unfollowUser(userId: \"user-2\")\n}"
+          },
+          "test_case_2": {
+            "name": "Unfollow user - not following should fail",
+            "prerequisites": "User must be logged in and NOT following 'user-3'",
+            "query": "mutation {\n  unfollowUser(userId: \"user-3\")\n}",
+            "expected_error": "You are not following this user"
+          }
+        }
+      }
+    },
+
+    "queries": {
+      "user_queries": {
+        "description": "User-related queries (no authentication required for these)"
+      },
+      "post_queries": {
+        "posts": {
+          "description": "Retrieve all posts from a specific user",
+          "test_case_1": {
+            "name": "Get posts - for existing user",
+            "prerequisites": "Create a user and some posts, get the user ID",
+            "query": "query {\n  posts(userId: \"user-1\") {\n    id\n    text\n    mediaUrl\n    author {\n      id\n      username\n      email\n    }\n    createdAt\n    updatedAt\n  }\n}"
+          },
+          "test_case_2": {
+            "name": "Get posts - for user with no posts",
+            "query": "query {\n  posts(userId: \"user-with-no-posts\") {\n    id\n    text\n    author {\n      username\n    }\n  }\n}",
+            "expected_result": "Empty array []"
+          }
+        },
+        "timeline": {
+          "description": "Get timeline for authenticated user (posts from followed users + own posts)",
+          "prerequisites": "User must be logged in (set Authorization header with JWT token)",
+          "test_case_1": {
+            "name": "Get timeline - for authenticated user",
+            "query": "query {\n  timeline {\n    id\n    text\n    mediaUrl\n    author {\n      id\n      username\n      email\n    }\n    createdAt\n    updatedAt\n  }\n}"
+          },
+          "test_case_2": {
+            "name": "Get timeline - without authentication should fail",
+            "query": "query {\n  timeline {\n    id\n    text\n    author {\n      username\n    }\n  }\n}",
+            "expected_error": "Authentication required"
+          }
+        }
+      },
+      "follow_queries": {
+        "following": {
+          "description": "Get list of users that a specific user is following",
+          "test_case_1": {
+            "name": "Get following list - for user following others",
+            "prerequisites": "Create users and follow relationships, get the user ID",
+            "query": "query {\n  following(userId: \"user-1\") {\n    id\n    username\n    email\n    createdAt\n  }\n}"
+          },
+          "test_case_2": {
+            "name": "Get following list - for user not following anyone",
+            "query": "query {\n  following(userId: \"user-no-follows\") {\n    id\n    username\n  }\n}",
+            "expected_result": "Empty array []"
+          }
+        },
+        "followers": {
+          "description": "Get list of users that are following a specific user",
+          "test_case_1": {
+            "name": "Get followers list - for popular user",
+            "prerequisites": "Create users and follow relationships, get the user ID",
+            "query": "query {\n  followers(userId: \"user-1\") {\n    id\n    username\n    email\n    createdAt\n  }\n}"
+          },
+          "test_case_2": {
+            "name": "Get followers list - for user with no followers",
+            "query": "query {\n  followers(userId: \"user-no-followers\") {\n    id\n    username\n  }\n}",
+            "expected_result": "Empty array []"
+          }
+        }
+      }
+    },
+
+    "testing_workflow": {
+      "step_1_setup": {
+        "description": "Create test users",
+        "operations": [
+          {
+            "operation": "Create User 1",
+            "query": "mutation { createUser(input: { username: \"user1\", email: \"user1@test.com\", password: \"password123\" }) { id username email } }"
+          },
+          {
+            "operation": "Create User 2",
+            "query": "mutation { createUser(input: { username: \"user2\", email: \"user2@test.com\", password: \"password456\" }) { id username email } }"
+          },
+          {
+            "operation": "Create User 3",
+            "query": "mutation { createUser(input: { username: \"user3\", email: \"user3@test.com\", password: \"password789\" }) { id username email } }"
+          }
+        ]
+      },
+      "step_2_authentication": {
+        "description": "Login users and get JWT tokens",
+        "operations": [
+          {
+            "operation": "Login User 1",
+            "query": "mutation { login(input: { email: \"user1@test.com\", password: \"password123\" }) { token } }",
+            "note": "Save the token for subsequent authenticated requests"
+          },
+          {
+            "operation": "Login User 2",
+            "query": "mutation { login(input: { email: \"user2@test.com\", password: \"password456\" }) { token } }",
+            "note": "Save this token to use for User 2 requests"
+          }
+        ]
+      },
+      "step_3_create_posts": {
+        "description": "Create posts as different users (use their JWT tokens)",
+        "operations": [
+          {
+            "operation": "User 1 creates a post",
+            "prerequisites": "Use User 1's JWT token in Authorization header",
+            "query": "mutation { createPost(input: { text: \"Hello from User 1!\", mediaUrl: null }) { id text author { username } createdAt } }"
+          },
+          {
+            "operation": "User 2 creates a post",
+            "prerequisites": "Use User 2's JWT token in Authorization header",
+            "query": "mutation { createPost(input: { text: \"Post from User 2 with image\", mediaUrl: \"https://example.com/image.jpg\" }) { id text mediaUrl author { username } } }"
+          },
+          {
+            "operation": "User 3 creates a post",
+            "prerequisites": "Use User 3's JWT token in Authorization header",
+            "query": "mutation { createPost(input: { text: \"User 3 is here!\", mediaUrl: null }) { id text author { username } } }"
+          }
+        ]
+      },
+      "step_4_follow_users": {
+        "description": "Create follow relationships",
+        "operations": [
+          {
+            "operation": "User 1 follows User 2",
+            "prerequisites": "Use User 1's JWT token",
+            "query": "mutation { followUser(userId: \"user-2-id\") }",
+            "note": "Replace 'user-2-id' with actual User 2 ID from creation"
+          },
+          {
+            "operation": "User 1 follows User 3",
+            "prerequisites": "Use User 1's JWT token",
+            "query": "mutation { followUser(userId: \"user-3-id\") }",
+            "note": "Replace 'user-3-id' with actual User 3 ID from creation"
+          },
+          {
+            "operation": "User 2 follows User 1",
+            "prerequisites": "Use User 2's JWT token",
+            "query": "mutation { followUser(userId: \"user-1-id\") }",
+            "note": "Replace 'user-1-id' with actual User 1 ID from creation"
+          }
+        ]
+      },
+      "step_5_query_data": {
+        "description": "Query data to verify everything works",
+        "operations": [
+          {
+            "operation": "Get User 1's posts",
+            "query": "query { posts(userId: \"user-1-id\") { id text author { username } createdAt } }",
+            "note": "Replace 'user-1-id' with actual User 1 ID"
+          },
+          {
+            "operation": "Get User 1's timeline (must be authenticated as User 1)",
+            "prerequisites": "Use User 1's JWT token",
+            "query": "query { timeline { id text author { username } createdAt } }"
+          },
+          {
+            "operation": "Get users that User 1 is following",
+            "query": "query { following(userId: \"user-1-id\") { id username email } }",
+            "note": "Replace 'user-1-id' with actual User 1 ID"
+          },
+          {
+            "operation": "Get followers of User 1",
+            "query": "query { followers(userId: \"user-1-id\") { id username email } }",
+            "note": "Replace 'user-1-id' with actual User 1 ID"
+          }
+        ]
+      },
+      "step_6_error_testing": {
+        "description": "Test error scenarios",
+        "operations": [
+          {
+            "operation": "Try to create duplicate user",
+            "query": "mutation { createUser(input: { username: \"user1\", email: \"user1@test.com\", password: \"newpass\" }) { id } }",
+            "expected_error": "User with this email or username already exists"
+          },
+          {
+            "operation": "Try to follow yourself",
+            "prerequisites": "Use User 1's JWT token",
+            "query": "mutation { followUser(userId: \"user-1-id\") }",
+            "expected_error": "You cannot follow yourself"
+          },
+          {
+            "operation": "Try to follow twice",
+            "prerequisites": "Use User 1's JWT token, User 1 already follows User 2",
+            "query": "mutation { followUser(userId: \"user-2-id\") }",
+            "expected_error": "You are already following this user"
+          },
+          {
+            "operation": "Try to unfollow non-followed user",
+            "prerequisites": "Use User 2's JWT token, User 2 doesn't follow User 3",
+            "query": "mutation { unfollowUser(userId: \"user-3-id\") }",
+            "expected_error": "You are not following this user"
+          },
+          {
+            "operation": "Try to create post without auth",
+            "query": "mutation { createPost(input: { text: \"No auth post\", mediaUrl: null }) { id } }",
+            "expected_error": "You must be logged in to create a post"
+          },
+          {
+            "operation": "Try to create empty post",
+            "prerequisites": "Use any user's JWT token",
+            "query": "mutation { createPost(input: { text: null, mediaUrl: null }) { id } }",
+            "expected_error": "A post must have either text or a media URL."
+          }
+        ]
+      }
+    },
+
+    "graphql_playground_setup": {
+      "headers": {
+        "description": "How to set authentication in GraphQL Playground",
+        "instructions": [
+          "1. Open GraphQL Playground at http://localhost:3000/graphql",
+          "2. Click the 'HTTP Headers' tab at the bottom",
+          "3. Add the following JSON for authenticated requests:",
+          "{\n  \"Authorization\": \"Bearer YOUR_JWT_TOKEN_HERE\"\n}"
+        ]
+      },
+      "importing_collection": {
+        "description": "How to import this JSON collection",
+        "instructions": [
+          "1. In GraphQL Playground, click File > Import...",
+          "2. Select this JSON file",
+          "3. All queries and mutations will be available in the sidebar"
+        ]
+      }
+    }
+  }
+}
