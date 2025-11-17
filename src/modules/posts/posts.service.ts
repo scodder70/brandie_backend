@@ -38,12 +38,20 @@ export class PostsService {
     }
   }
 
-  // --- ADD THIS SKELETON METHOD ---
+  // --- IMPLEMENT THIS METHOD ---
   async getPostsForUser(userId: string): Promise<Post[]> {
-    // TODO: Implement this
     // 1. Find all posts where 'authorId' matches 'userId'
-    // 2. Order them by 'createdAt' (newest first)
+    const posts = await this.prisma.post.findMany({
+      where: {
+        authorId: userId,
+      },
+      // 2. Order them by 'createdAt' (newest first)
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
     // 3. Return the list of posts
-    throw new Error('Method not implemented.');
+    return posts;
   }
 }
