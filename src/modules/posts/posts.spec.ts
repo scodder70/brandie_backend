@@ -36,7 +36,7 @@ describe('PostsService (Integration)', () => {
     await prisma.$disconnect();
   });
 
-  // --- Our "Happy Path" Test ---
+  // --- "createPost" tests ---
   it('should create a new post with text content', async () => {
     // 1. ARRANGE
     const postInput = {
@@ -59,7 +59,6 @@ describe('PostsService (Integration)', () => {
     expect(dbPost?.authorId).toBe(testUser.id);
   });
 
-  // --- ADD THIS NEW "RED" TEST ---
   it('should throw an error if a post has no text or mediaUrl', async () => {
     // 1. ARRANGE
     const emptyPostInput = {
@@ -74,5 +73,39 @@ describe('PostsService (Integration)', () => {
     ).rejects.toThrow(
       new GraphQLError('A post must have either text or a media URL.'),
     );
+  });
+
+  // --- THIS IS THE TEST WE ARE FIXING ---
+  it('should return all posts for a specific user', async () => {
+    // 1. ARRANGE
+    // Create another user
+    const otherUser = await usersService.createUser({
+      username: 'otheruser',
+      email: 'other@test.com',
+      password: 'password',
+    });
+
+    // testUser creates 2 posts
+    // --- ADD mediaUrl: null ---
+    await postsService.createPost({ text: 'Post 1', mediaUrl: null }, testUser);
+    // We add a small delay to ensure 'createdAt' is different
+    // --- ADD mediaUrl: null ---
+    await postsService.createPost({ text: 'Post 2', mediaUrl: null }, testUser);
+
+    // otherUser creates 1 post
+    // --- ADD mediaUrl: null ---
+    await postsService.createPost({ text: 'Post 3', mediaUrl: null }, otherUser);
+
+    // 2. ACT
+    // This will fail with "Method not implemented"
+    const posts = await postsService.getPostsForUser(testUser.id);
+
+    // 3. ASSERT
+    expect(posts).toBeDefined();
+    expect(posts.length).toBe(2);
+    // Check that they are in the correct order (newest first)
+    expect(posts[0].text).toBe('Post 2');
+    expect(posts[1].text).toBe('Post 1');
+    expect(posts[0].authorId).toBe(testUser.id);
   });
 });

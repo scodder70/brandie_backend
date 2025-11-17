@@ -37,4 +37,13 @@ export class PostsService {
       });
     }
   }
+
+  // --- ADD THIS SKELETON METHOD ---
+  async getPostsForUser(userId: string): Promise<Post[]> {
+    // TODO: Implement this
+    // 1. Find all posts where 'authorId' matches 'userId'
+    // 2. Order them by 'createdAt' (newest first)
+    // 3. Return the list of posts
+    throw new Error('Method not implemented.');
+  }
 }
